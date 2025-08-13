@@ -1,0 +1,15 @@
+volumes:
+  open_meteo_database:
+x-shared_environment: &shared_environment
+  LOG_LEVEL: info
+
+services:
+  openmeteo_api:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: openmeteo-api
+    volumes:
+      - open_meteo_database:/app/data
+    environment:
+      <<:
+    ports:
+      - '8080:8080'

@@ -551,7 +551,7 @@ def main():
     
     # Run the server
     uvicorn.run(
-        "WeatherStation.weather_station.index:app",
+        "weather_station.index:app",
         host=config.HOST,
         port=config.PORT,
         log_level=config.LOG_LEVEL.lower(),

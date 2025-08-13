@@ -1,0 +1,105 @@
+# Docker Compose file for running the Open-Meteo API on Docker
+# Start with: docker compose up
+#
+# http://0.0.0.0:8080/v1/forecast?latitude=47.1&longitude=8.6&hourly=temperature_2m&models=icon_global
+#
+
+volumes:
+  open_meteo_database:
+
+x-shared_environment: &shared_environment
+  LOG_LEVEL: info
+
+networks:
+  open_network_network:
+
+services:
+
+  open-meteo-sync-ecmwf-ifs025:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-sync-wcmf
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync ecmwf_ifs025 temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ ECMWF failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-sync-meteofrance-arpege_world025:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-sync-meteofrance-arpege-world025
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync meteofrance_arpege_world025 temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ MeteoFrance failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-dwd-icon:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-dwd-icon
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync dwd_icon temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ DWD ICON failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-ncepgfs025:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-ncepgfs025
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync ncep_gfs025 temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ NCEP GFS failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-jsm:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-jsm
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync jsm temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ JSM failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-api
+    networks:
+      - open_network_network
+    volumes:
+      - open_meteo_database:/app/data
+    environment:
+      <<: *shared_environment
+    ports:
+      - "8080:8080"
+    user: '0'
+    command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+
+  weather_station:
+    image: weatherstation:latest
+    container_name: weatherstation
+    networks:
+      - open_network_network
+    ports:
+      - "8110:8110"
+    environment:
+      - OPEN_METEO_API_URL=http://open-meteo-api:8080
