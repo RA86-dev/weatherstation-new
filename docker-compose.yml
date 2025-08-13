@@ -67,15 +67,158 @@ services:
       - open_meteo_database:/app/data
     restart: always
 
-  open-meteo-jsm:
+  open-meteo-jma-gsm:
     image: ghcr.io/open-meteo/open-meteo
-    container_name: open-meteo-jsm
+    container_name: open-meteo-jma-gsm
     networks:
       - open_network_network
     environment:
       <<: *shared_environment
     command: >
-      sync jsm temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ JSM failed'
+      sync jma_gsm temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ JMA GSM failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-dwd-icon-eu:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-dwd-icon-eu
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync dwd_icon_eu temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ DWD ICON EU failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-dwd-icon-d2:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-dwd-icon-d2
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync dwd_icon_d2 temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ DWD ICON D2 failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-ncep-gfs013:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-ncep-gfs013
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync ncep_gfs013 temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ NCEP GFS013 failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-meteofrance-arpege-europe:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-meteofrance-arpege-europe
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync meteofrance_arpege_europe temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ MeteoFrance Arpege Europe failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-ukmo-global:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-ukmo-global
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync ukmo_global_deterministic_10km temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ UKMO Global failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-cmc-gem-gdps:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-cmc-gem-gdps
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync cmc_gem_gdps temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ CMC GEM GDPS failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-jma-msm:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-jma-msm
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync jma_msm temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ JMA MSM failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-cma-grapes-global:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-cma-grapes-global
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync cma_grapes_global temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ CMA GRAPES Global failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-bom-access-global:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-bom-access-global
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync bom_access_global temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ BOM Access Global failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-knmi-harmonie-arome-europe:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-knmi-harmonie-arome-europe
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync knmi_harmonie_arome_europe temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ KNMI Harmonie Arome Europe failed'
+    volumes:
+      - open_meteo_database:/app/data
+    restart: always
+
+  open-meteo-kma-gdps:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-kma-gdps
+    networks:
+      - open_network_network
+    environment:
+      <<: *shared_environment
+    command: >
+      sync kma_gdps temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation --past-days 3 --repeat-interval 4320 --concurrent 1 || echo '⚠️ KMA GDPS failed'
     volumes:
       - open_meteo_database:/app/data
     restart: always
