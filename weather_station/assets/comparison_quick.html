@@ -175,6 +175,13 @@
                 return;
             }
             
+            // Validate parameters exist
+            if (!locationData[param1] || !locationData[param2]) {
+                console.error(`Missing data for parameters: ${param1} or ${param2}`);
+                plotDiv.innerHTML = '<div class="alert alert-warning">Selected parameters not available for this location</div>';
+                return;
+            }
+            
             // Filter null values while maintaining time alignment
             const param1Filtered = filterDataWithTime(locationData.time, locationData[param1]);
             const param2Filtered = filterDataWithTime(locationData.time, locationData[param2]);

@@ -115,8 +115,8 @@ class WeatherStation {
         if (!this.dataStatus || !statusIcon || !statusText || !indicator) return;
 
         const info = this.dataStatus.data_info;
-        const cache = this.dataStatus.cache_status;
-        const apiAccessible = info.api_accessible;
+        const cache = this.dataStatus.cache_status || {};
+        const apiAccessible = info?.api_accessible;
         
         // Reset classes
         indicator.className = 'data-status-indicator';
