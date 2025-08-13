@@ -97,6 +97,8 @@ services:
   weather_station:
     image: weatherstation:latest
     container_name: weatherstation
+    depends_on:
+      - open-meteo
     networks:
       - open_network_network
     ports:
