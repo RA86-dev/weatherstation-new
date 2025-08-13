@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Statistics - Weather Station</title>
+    <meta name="description" content="Comprehensive statistical analysis of weather data">
+    
+    <!-- Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/custom-theme.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="/assets/manifest.json">
+    <meta name="theme-color" content="#2c5aa0">
+    <link rel="apple-touch-icon" href="/assets/weatherbox-icon.png">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="/assets/script.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">🌤️ Weather Station</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">🏠 Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/intmap">🗺️ Pressure Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/comparison">📊 Compare Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/weatherstat">📈 Statistics</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container fade-in">
+        <div class="content-wrapper">
+            <div class="text-center mb-4">
+                <h1 class="text-gradient">📈 Weather Statistics</h1>
+                <p class="lead">Advanced statistical analysis of weather parameters</p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">⚙️ Analysis Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="param1" class="form-label">🌡️ Primary Parameter</label>
+                            <select id="param1" class="form-select">
+                                <!-- Will be populated from weatherParams -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="param2" class="form-label">🌬️ Secondary Parameter</label>
+                            <select id="param2" class="form-select">
+                                <!-- Will be populated from weatherParams -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="location" class="form-label">📍 Location</label>
+                            <select id="location" class="form-select">
+                                <!-- Will be populated from JSON -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4 id="param1Title" class="mb-0">Parameter 1 Statistics</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-card">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <div class="stats-label">Mean</div>
+                                            <div id="param1Mean" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Median</div>
+                                            <div id="param1Median" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Mode</div>
+                                            <div id="param1Mode" class="stats-value">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <div class="stats-label">Minimum</div>
+                                            <div id="param1Min" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Maximum</div>
+                                            <div id="param1Max" class="stats-value">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="param1Histogram"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4 id="param2Title" class="mb-0">Parameter 2 Statistics</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-card">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <div class="stats-label">Mean</div>
+                                            <div id="param2Mean" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Median</div>
+                                            <div id="param2Median" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Mode</div>
+                                            <div id="param2Mode" class="stats-value">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <div class="stats-label">Minimum</div>
+                                            <div id="param2Min" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Maximum</div>
+                                            <div id="param2Max" class="stats-value">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="param2Histogram"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Correlation Analysis Section -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0">📊 Correlation Analysis</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-8">
+                                    <div id="scatterPlot" style="height: 400px;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stats-card">
+                                        <h6 class="mb-3">Correlation Metrics</h6>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Correlation Coefficient</div>
+                                            <div id="correlationCoeff" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Relationship Strength</div>
+                                            <div id="correlationStrength" class="stats-value">-</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="stats-label">Data Points</div>
+                                            <div id="dataPointCount" class="stats-value">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-attribution">
+        <p class="mb-0">
+            <small>Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (Not Endorsed)</small>
+        </p>
+    </div>
+
+    <script>
+        // Weather parameters mapping
+        const weatherParams = {
+            'temperature_2m': 'Temperature (°C)',
+            'relative_humidity_2m': 'Relative Humidity (%)',
+            'dew_point_2m': 'Dew Point (°C)',
+            'apparent_temperature': 'Apparent Temperature (°C)',
+            'precipitation_probability': 'Precipitation Probability (%)',
+            'precipitation': 'Precipitation (mm)',
+            'rain': 'Rain (mm)',
+            'showers': 'Showers (mm)',
+            'snowfall': 'Snowfall (cm)',
+            'snow_depth': 'Snow Depth (m)',
+            'pressure_msl': 'Pressure (hPa)',
+            'surface_pressure': 'Surface Pressure (hPa)',
+            'cloud_cover': 'Cloud Cover (%)',
+            'visibility': 'Visibility (m)',
+            'uv_index': 'UV Index',
+            'wind_speed_10m': 'Wind Speed (km/h)',
+            'wind_direction_10m': 'Wind Direction (°)',
+            'wind_gusts_10m': 'Wind Gusts (km/h)',
+            'soil_temperature_0cm': 'Soil Temperature (°C)',
+            'soil_moisture_0_to_1cm': 'Soil Moisture (%)'
+        };
+
+        // Statistical functions
+        function mean(arr) {
+            return arr.reduce((a, b) => a + b) / arr.length;
+        }
+
+        function median(arr) {
+            const sorted = [...arr].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+
+        function mode(arr) {
+            const counts = {};
+            let maxCount = 0;
+            let modeValue = arr.length > 0 ? arr[0] : null;
+            
+            arr.forEach(value => {
+                counts[value] = (counts[value] || 0) + 1;
+                if (counts[value] > maxCount) {
+                    maxCount = counts[value];
+                    modeValue = value;
+                }
+            });
+            
+            return modeValue;
+        }
+
+        function stdDev(arr) {
+            const avg = mean(arr);
+            const squareDiffs = arr.map(value => Math.pow(value - avg, 2));
+            return Math.sqrt(mean(squareDiffs));
+        }
+
+        function correlation(x, y) {
+            const meanX = mean(x);
+            const meanY = mean(y);
+            const xDevs = x.map(val => val - meanX);
+            const yDevs = y.map(val => val - meanY);
+            
+            const numerator = xDevs.reduce((sum, xDev, i) => sum + xDev * yDevs[i], 0);
+            const denominator = Math.sqrt(
+                xDevs.reduce((sum, dev) => sum + dev * dev, 0) *
+                yDevs.reduce((sum, dev) => sum + dev * dev, 0)
+            );
+            
+            return numerator / denominator;
+        }
+
+        // Utility function to safely handle null/undefined values
+        function safeToFixed(value, decimals = 2) {
+            if (value == null || isNaN(value) || !isFinite(value)) {
+                return 'N/A';
+            }
+            return Number(value).toFixed(decimals);
+        }
+
+        // Filter out null/undefined values from arrays
+        function filterValidValues(arr) {
+            return arr.filter(val => val != null && !isNaN(val) && isFinite(val));
+        }
+
+        // Update functions
+        function updateStatistics(data) {
+            const locationData = data[locationSelect.value].hourly;
+            const param1Data = filterValidValues(locationData[param1Select.value]);
+            const param2Data = filterValidValues(locationData[param2Select.value]);
+
+            // Update titles
+            document.getElementById('param1Title').textContent = `${weatherParams[param1Select.value]} Statistics`;
+            document.getElementById('param2Title').textContent = `${weatherParams[param2Select.value]} Statistics`;
+
+            // Parameter 1 statistics
+            document.getElementById('param1Mean').textContent = safeToFixed(mean(param1Data));
+            document.getElementById('param1Median').textContent = safeToFixed(median(param1Data));
+            document.getElementById('param1Mode').textContent = safeToFixed(mode(param1Data));
+            document.getElementById('param1Min').textContent = safeToFixed(param1Data.length > 0 ? Math.min(...param1Data) : null);
+            document.getElementById('param1Max').textContent = safeToFixed(param1Data.length > 0 ? Math.max(...param1Data) : null);
+
+            // Parameter 2 statistics
+            document.getElementById('param2Mean').textContent = safeToFixed(mean(param2Data));
+            document.getElementById('param2Median').textContent = safeToFixed(median(param2Data));
+            document.getElementById('param2Mode').textContent = safeToFixed(mode(param2Data));
+            document.getElementById('param2Min').textContent = safeToFixed(param2Data.length > 0 ? Math.min(...param2Data) : null);
+            document.getElementById('param2Max').textContent = safeToFixed(param2Data.length > 0 ? Math.max(...param2Data) : null);
+
+            // Update visualizations
+            updateVisualizations(param1Data, param2Data);
+        }
+
+        function updateVisualizations(param1Data, param2Data) {
+            // Histogram for Parameter 1
+            const trace1 = {
+                x: param1Data,
+                type: 'histogram',
+                name: weatherParams[param1Select.value],
+                marker: { color: '#2c5aa0' }
+            };
+            Plotly.newPlot('param1Histogram', [trace1], {
+                title: 'Distribution',
+                showlegend: false,
+                margin: { t: 40, r: 10, l: 40, b: 40 }
+            });
+
+            // Histogram for Parameter 2
+            const trace2 = {
+                x: param2Data,
+                type: 'histogram',
+                name: weatherParams[param2Select.value],
+                marker: { color: '#17a2b8' }
+            };
+            Plotly.newPlot('param2Histogram', [trace2], {
+                title: 'Distribution',
+                showlegend: false,
+                margin: { t: 40, r: 10, l: 40, b: 40 }
+            });
+
+            // Calculate correlation
+            const correlationCoeff = correlation(param1Data, param2Data);
+            
+            // Update correlation metrics
+            updateCorrelationMetrics(correlationCoeff, param1Data.length);
+
+            // Scatter plot
+            const scatter = {
+                x: param1Data,
+                y: param2Data,
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 6,
+                    opacity: 0.7,
+                    color: param1Data.map((val, i) => i), // Color by index for variety
+                    colorscale: 'Viridis',
+                    showscale: false
+                },
+                name: 'Data Points'
+            };
+            
+            Plotly.newPlot('scatterPlot', [scatter], {
+                title: `${weatherParams[param1Select.value]} vs ${weatherParams[param2Select.value]}`,
+                xaxis: { title: weatherParams[param1Select.value] },
+                yaxis: { title: weatherParams[param2Select.value] },
+                showlegend: false,
+                margin: { t: 60, r: 40, l: 60, b: 60 }
+            });
+        }
+
+        function updateCorrelationMetrics(corrCoeff, dataPoints) {
+            // Update correlation coefficient
+            document.getElementById('correlationCoeff').textContent = safeToFixed(corrCoeff, 4);
+            
+            // Determine relationship strength
+            let strength = '';
+            const absCorr = Math.abs(corrCoeff);
+            if (absCorr >= 0.8) strength = 'Very Strong';
+            else if (absCorr >= 0.6) strength = 'Strong';
+            else if (absCorr >= 0.4) strength = 'Moderate';
+            else if (absCorr >= 0.2) strength = 'Weak';
+            else strength = 'Very Weak';
+            
+            if (corrCoeff > 0) strength += ' Positive';
+            else if (corrCoeff < 0) strength += ' Negative';
+            else strength = 'No Correlation';
+            
+            document.getElementById('correlationStrength').textContent = strength;
+            document.getElementById('dataPointCount').textContent = dataPoints.toLocaleString();
+        }
+
+        // Initialize
+        function populateParamSelects() {
+            param1Select.innerHTML = '';
+            param2Select.innerHTML = '';
+
+            Object.entries(weatherParams).forEach(([value, label]) => {
+                const option1 = document.createElement('option');
+                option1.value = value;
+                option1.textContent = label;
+                param1Select.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = value;
+                option2.textContent = label;
+                param2Select.appendChild(option2);
+            });
+
+            param2Select.selectedIndex = 1;
+        }
+
+        // Get DOM elements
+        const param1Select = document.getElementById('param1');
+        const param2Select = document.getElementById('param2');
+        const locationSelect = document.getElementById('location');
+
+        // Initialize the page
+        async function initializePage() {
+            try {
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'alert alert-info';
+                loadingIndicator.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Loading weather statistics...</span>
+                    </div>
+                `;
+                document.querySelector('.content-wrapper').insertBefore(loadingIndicator, document.querySelector('.card'));
+
+                // Use the enhanced weather station API
+                let data;
+                if (window.weatherStation) {
+                    // Use the global weather station instance if available
+                    data = await window.weatherStation.loadWeatherData();
+                } else {
+                    // Fallback to direct API call
+                    const response = await fetch('/api/data/weather');
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    const result = await response.json();
+                    data = result.data;
+                }
+
+                if (!data) {
+                    throw new Error('No weather data available');
+                }
+
+                // Remove loading indicator
+                loadingIndicator.remove();
+
+                // Populate location select
+                const locations = Object.keys(data);
+                locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    locationSelect.appendChild(option);
+                });
+
+                // Populate parameter selects
+                populateParamSelects();
+
+                // Add event listeners
+                param1Select.addEventListener('change', () => updateStatistics(data));
+                param2Select.addEventListener('change', () => updateStatistics(data));
+                locationSelect.addEventListener('change', () => updateStatistics(data));
+
+                // Initial update
+                updateStatistics(data);
+
+            } catch (error) {
+                console.error('Error loading weather statistics:', error);
+                
+                // Show error message
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger';
+                errorAlert.innerHTML = `
+                    <h5>⚠️ Unable to Load Weather Data</h5>
+                    <p>Error: ${error.message}</p>
+                    <button class="btn btn-outline-danger btn-sm" onclick="location.reload()">
+                        🔄 Retry
+                    </button>
+                `;
+                document.querySelector('.content-wrapper').appendChild(errorAlert);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
+        }
+    </script>
+</body>
+</html>

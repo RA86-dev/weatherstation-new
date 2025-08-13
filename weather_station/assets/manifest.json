@@ -1,0 +1,99 @@
+{
+  "name": "Weather Station",
+  "short_name": "WeatherBox",
+  "description": "Professional weather station with real-time data, analytics, and interactive visualizations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2c5aa0",
+  "theme_color": "#2c5aa0",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["weather", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/weatherbox-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/weatherbox-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/weatherbox-icon.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/weatherbox-icon.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/weatherbox-icon.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/assets/screenshot-narrow.png", 
+      "sizes": "640x1136",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View current weather dashboard",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/assets/weatherbox-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Pressure Map",
+      "short_name": "Map",
+      "description": "Interactive pressure mapping",
+      "url": "/intmap",
+      "icons": [
+        {
+          "src": "/assets/weatherbox-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "short_name": "Stats",
+      "description": "Weather data analytics",
+      "url": "/weatherstat",
+      "icons": [
+        {
+          "src": "/assets/weatherbox-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data Comparison - Weather Station</title>
+    <meta name="description" content="Compare weather parameters across different locations and time periods">
+    
+    <!-- Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/custom-theme.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="/assets/manifest.json">
+    <meta name="theme-color" content="#2c5aa0">
+    <link rel="apple-touch-icon" href="/assets/weatherbox-icon.png">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="/assets/script.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">🌤️ Weather Station</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">🏠 Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/intmap">🗺️ Pressure Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/comparison">📊 Compare Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/weatherstat">📈 Statistics</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container fade-in">
+        <div class="content-wrapper">
+            <div class="text-center mb-4">
+                <h1 class="text-gradient">📊 Weather Data Comparison</h1>
+                <p class="lead">Compare multiple weather parameters across locations</p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">🎯 Comparison Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="param1" class="form-label">🌡️ Primary Parameter</label>
+                            <select id="param1" class="form-select">
+                                <!-- Will be populated from weatherParams -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="param2" class="form-label">🌬️ Secondary Parameter</label>
+                            <select id="param2" class="form-select">
+                                <!-- Will be populated from weatherParams -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="location" class="form-label">📍 Location</label>
+                            <select id="location" class="form-select">
+                                <!-- Will be populated with locations from JSON -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">📈 Comparison Chart</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div id="plotDiv" style="width: 100%; height: 600px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-attribution">
+        <p class="mb-0">
+            <small>Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (Not Endorsed)</small>
+        </p>
+    </div>    <script>
+        // Weather parameters mapping
+        const weatherParams = {
+            'temperature_2m': 'Temperature (°C)',
+            'pressure_msl': 'Pressure (hPa)',
+            'relative_humidity_2m': 'Relative Humidity (%)',
+            'wind_speed_10m': 'Wind Speed (km/h)',
+            'relative_humidity_2m':"Relative Humidity (%)",
+            "dew_point_2m":"Dew Point (2m, C)",
+            "apparent_temperature":"Apparent Temperature",
+            "precipitation_probability":"Precipitation Probability (%)",
+            "precipitation":"Precipitation (mm)",
+            "rain":"Rain (mm)",
+            "showers":"Showers: (mm)",
+            "snowfall": "Snowfall (cm)",
+            "snow_depth": "Snow Depth (meters)",
+            "pressure_msl": "Pressure (hPA)",
+            "surface_pressure":"Surface Pressure (hPA)",
+            "cloud_cover":"Cloud Cover (%)",
+            "wind_speed_10m": "Wind Speed (10m, km/h)",
+            "wind_direction_10m": "Wind Direction (10m, degrees)",
+            "soil_temperature_0cm": "Soil Temperature (C)",
+            "soil_moisture_0_to_1cm": "Soil Moisture (%)"
+        };
+
+
+        // Get DOM elements
+        const param1Select = document.getElementById('param1');
+        const param2Select = document.getElementById('param2');
+        const locationSelect = document.getElementById('location');
+        const plotDiv = document.getElementById('plotDiv');
+
+        // Utility function to filter out null/undefined values while keeping time alignment
+        function filterDataWithTime(timeArray, dataArray) {
+            const filtered = { time: [], data: [] };
+            
+            // Safety checks
+            if (!timeArray || !dataArray || !Array.isArray(timeArray) || !Array.isArray(dataArray)) {
+                console.warn('Invalid arrays provided to filterDataWithTime');
+                return filtered;
+            }
+            
+            if (timeArray.length === 0 || dataArray.length === 0) {
+                console.warn('Empty arrays provided to filterDataWithTime');
+                return filtered;
+            }
+            
+            for (let i = 0; i < timeArray.length; i++) {
+                // Check if index exists in dataArray
+                if (i < dataArray.length && dataArray[i] != null && !isNaN(dataArray[i]) && isFinite(dataArray[i])) {
+                    filtered.time.push(timeArray[i]);
+                    filtered.data.push(dataArray[i]);
+                }
+            }
+            return filtered;
+        }
+
+        // Function to update the plot
+        function updatePlot(data) {
+            const selectedLocation = locationSelect.value;
+            const param1 = param1Select.value;
+            const param2 = param2Select.value;
+
+            // Safety checks
+            if (!data || !data[selectedLocation]) {
+                console.error(`No data available for location: ${selectedLocation}`);
+                plotDiv.innerHTML = '<div class="alert alert-warning">No data available for selected location</div>';
+                return;
+            }
+
+            const locationData = data[selectedLocation].hourly;
+            if (!locationData) {
+                console.error(`No hourly data available for location: ${selectedLocation}`);
+                plotDiv.innerHTML = '<div class="alert alert-warning">No hourly data available for selected location</div>';
+                return;
+            }
+            
+            // Filter null values while maintaining time alignment
+            const param1Filtered = filterDataWithTime(locationData.time, locationData[param1]);
+            const param2Filtered = filterDataWithTime(locationData.time, locationData[param2]);
+
+            const trace1 = {
+                x: param1Filtered.time,
+                y: param1Filtered.data,
+                name: weatherParams[param1],
+                type: 'scatter'
+            };
+
+            const trace2 = {
+                x: param2Filtered.time,
+                y: param2Filtered.data,
+                name: weatherParams[param2],
+                yaxis: 'y2',
+                type: 'scatter'
+            };
+
+            const layout = {
+                title: `Weather Parameters Comparison for ${selectedLocation}`,
+                xaxis: { title: 'Time' },
+                yaxis: { 
+                    title: weatherParams[param1],
+                    side: 'left'
+                },
+                yaxis2: {
+                    title: weatherParams[param2],
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                showlegend: true,
+                legend: {
+                    x: 0,
+                    y: 1
+                }
+            };
+
+            Plotly.newPlot(plotDiv, [trace1, trace2], layout);
+        }
+
+        // Function to populate parameter selects
+        function populateParamSelects() {
+            // Clear existing options
+            param1Select.innerHTML = '';
+            param2Select.innerHTML = '';
+
+            // Add options for each weather parameter
+            Object.entries(weatherParams).forEach(([value, label]) => {
+                const option1 = document.createElement('option');
+                option1.value = value;
+                option1.textContent = label;
+                param1Select.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = value;
+                option2.textContent = label;
+                param2Select.appendChild(option2);
+            });
+
+            // Set default values (first and second options)
+            param2Select.selectedIndex = 1;
+        }
+
+        // Initialize the page
+        async function initializePage() {
+            try {
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'alert alert-info';
+                loadingIndicator.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Loading weather comparison data...</span>
+                    </div>
+                `;
+                document.querySelector('.content-wrapper').insertBefore(loadingIndicator, document.querySelector('.card'));
+
+                // Use the enhanced weather station API
+                let data;
+                if (window.weatherStation) {
+                    // Use the global weather station instance if available
+                    data = await window.weatherStation.loadWeatherData();
+                } else {
+                    // Fallback to direct API call
+                    const response = await fetch('/api/data/weather');
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    const result = await response.json();
+                    data = result.data;
+                }
+
+                if (!data) {
+                    throw new Error('No weather data available');
+                }
+
+                // Remove loading indicator
+                loadingIndicator.remove();
+
+                // Populate location select
+                const locations = Object.keys(data);
+                locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    locationSelect.appendChild(option);
+                });
+
+                // Populate parameter selects
+                populateParamSelects();
+
+                // Add event listeners
+                param1Select.addEventListener('change', () => updatePlot(data));
+                param2Select.addEventListener('change', () => updatePlot(data));
+                locationSelect.addEventListener('change', () => updatePlot(data));
+
+                // Initial plot
+                updatePlot(data);
+
+            } catch (error) {
+                console.error('Error loading weather comparison:', error);
+                
+                // Show error message
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger';
+                errorAlert.innerHTML = `
+                    <h5>⚠️ Unable to Load Weather Data</h5>
+                    <p>Error: ${error.message}</p>
+                    <button class="btn btn-outline-danger btn-sm" onclick="location.reload()">
+                        🔄 Retry
+                    </button>
+                `;
+                document.querySelector('.content-wrapper').appendChild(errorAlert);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
+        }
+    </script>
+</body>
+</html>
