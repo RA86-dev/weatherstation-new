@@ -99,28 +99,12 @@
             <small>Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (Not Endorsed)</small>
         </p>
     </div>    <script>
-        // Weather parameters mapping
-        const weatherParams = {
+        // Weather parameters mapping - will be loaded dynamically
+        let weatherParams = {
             'temperature_2m': 'Temperature (°C)',
-            'pressure_msl': 'Pressure (hPa)',
             'relative_humidity_2m': 'Relative Humidity (%)',
-            'wind_speed_10m': 'Wind Speed (km/h)',
-            'relative_humidity_2m':"Relative Humidity (%)",
-            "dew_point_2m":"Dew Point (2m, C)",
-            "apparent_temperature":"Apparent Temperature",
-            "precipitation_probability":"Precipitation Probability (%)",
-            "precipitation":"Precipitation (mm)",
-            "rain":"Rain (mm)",
-            "showers":"Showers: (mm)",
-            "snowfall": "Snowfall (cm)",
-            "snow_depth": "Snow Depth (meters)",
-            "pressure_msl": "Pressure (hPA)",
-            "surface_pressure":"Surface Pressure (hPA)",
-            "cloud_cover":"Cloud Cover (%)",
-            "wind_speed_10m": "Wind Speed (10m, km/h)",
-            "wind_direction_10m": "Wind Direction (10m, degrees)",
-            "soil_temperature_0cm": "Soil Temperature (C)",
-            "soil_moisture_0_to_1cm": "Soil Moisture (%)"
+            'pressure_msl': 'Pressure MSL (hPa)',
+            'wind_speed_10m': 'Wind Speed (km/h)'
         };
 
 
@@ -223,6 +207,22 @@
             Plotly.newPlot(plotDiv, [trace1, trace2], layout);
         }
 
+        // Function to load available parameters from API
+        async function loadAvailableParameters() {
+            try {
+                const response = await fetch('/api/data/parameters');
+                if (response.ok) {
+                    const result = await response.json();
+                    weatherParams = result.parameters;
+                    console.log(`Loaded ${result.total_available} available parameters`);
+                } else {
+                    console.warn('Failed to load available parameters, using defaults');
+                }
+            } catch (error) {
+                console.warn('Error loading available parameters:', error);
+            }
+        }
+
         // Function to populate parameter selects
         function populateParamSelects() {
             // Clear existing options
@@ -243,7 +243,9 @@
             });
 
             // Set default values (first and second options)
-            param2Select.selectedIndex = 1;
+            if (param2Select.options.length > 1) {
+                param2Select.selectedIndex = 1;
+            }
         }
 
         // Initialize the page
@@ -259,6 +261,9 @@
                     </div>
                 `;
                 document.querySelector('.content-wrapper').insertBefore(loadingIndicator, document.querySelector('.card'));
+
+                // Load available parameters first
+                await loadAvailableParameters();
 
                 // Use the enhanced weather station API
                 let data;

@@ -426,7 +426,17 @@ class WeatherDataManager:
             'wind_direction_10m': ['wind_direction_10m_ecmwf_ifs025', 'wind_direction_10m_ncep_gfs025', 'wind_direction_10m_meteofrance_arpege_world025'],
             'precipitation': ['precipitation_ecmwf_ifs025', 'precipitation_ncep_gfs025', 'precipitation_meteofrance_arpege_world025'],
             'dew_point_2m': ['dew_point_2m_ecmwf_ifs025', 'dew_point_2m_ncep_gfs025', 'dew_point_2m_meteofrance_arpege_world025'],
-            'apparent_temperature': ['apparent_temperature_ecmwf_ifs025', 'apparent_temperature_ncep_gfs025', 'apparent_temperature_meteofrance_arpege_world025']
+            'apparent_temperature': ['apparent_temperature_ecmwf_ifs025', 'apparent_temperature_ncep_gfs025', 'apparent_temperature_meteofrance_arpege_world025'],
+            'precipitation_probability': ['precipitation_probability_ecmwf_ifs025', 'precipitation_probability_ncep_gfs025', 'precipitation_probability_meteofrance_arpege_world025'],
+            'rain': ['rain_ecmwf_ifs025', 'rain_ncep_gfs025', 'rain_meteofrance_arpege_world025'],
+            'showers': ['showers_ecmwf_ifs025', 'showers_ncep_gfs025', 'showers_meteofrance_arpege_world025'],
+            'snowfall': ['snowfall_ecmwf_ifs025', 'snowfall_ncep_gfs025', 'snowfall_meteofrance_arpege_world025'],
+            'snow_depth': ['snow_depth_ecmwf_ifs025', 'snow_depth_ncep_gfs025', 'snow_depth_meteofrance_arpege_world025'],
+            'surface_pressure': ['surface_pressure_ecmwf_ifs025', 'surface_pressure_ncep_gfs025', 'surface_pressure_meteofrance_arpege_world025'],
+            'cloud_cover': ['cloud_cover_ecmwf_ifs025', 'cloud_cover_ncep_gfs025', 'cloud_cover_meteofrance_arpege_world025'],
+            'wind_gusts_10m': ['wind_gusts_10m_ecmwf_ifs025', 'wind_gusts_10m_ncep_gfs025', 'wind_gusts_10m_meteofrance_arpege_world025'],
+            'soil_temperature_0cm': ['soil_temperature_0cm_ecmwf_ifs025', 'soil_temperature_0cm_ncep_gfs025', 'soil_temperature_0cm_meteofrance_arpege_world025'],
+            'soil_moisture_0_to_1cm': ['soil_moisture_0_to_1cm_ecmwf_ifs025', 'soil_moisture_0_to_1cm_ncep_gfs025', 'soil_moisture_0_to_1cm_meteofrance_arpege_world025']
         }
         
         # Copy time field

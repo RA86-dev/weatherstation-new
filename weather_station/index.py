@@ -389,6 +389,78 @@ class WeatherStationApp:
                     "timestamp": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
                 }, status_code=500)
         
+        @self.app.get("/api/data/parameters")
+        async def get_available_parameters():
+            """Get list of available weather parameters from actual data"""
+            try:
+                # Get sample data to determine available parameters
+                locations = self.live_data_manager.load_locations()
+                if not locations:
+                    return JSONResponse({
+                        "error": "No locations available",
+                        "parameters": {},
+                        "timestamp": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                    }, status_code=404)
+                
+                # Get first location's data to check available parameters
+                sample_city = list(locations.keys())[0]
+                sample_data = self.live_data_manager.get_weather_data(sample_city)
+                
+                available_params = {}
+                if sample_data and 'hourly' in sample_data:
+                    hourly_data = sample_data['hourly']
+                    
+                    # Define parameter labels
+                    param_labels = {
+                        'temperature_2m': 'Temperature (°C)',
+                        'relative_humidity_2m': 'Relative Humidity (%)',
+                        'dew_point_2m': 'Dew Point (°C)',
+                        'apparent_temperature': 'Apparent Temperature (°C)',
+                        'precipitation_probability': 'Precipitation Probability (%)',
+                        'precipitation': 'Precipitation (mm)',
+                        'rain': 'Rain (mm)',
+                        'showers': 'Showers (mm)',
+                        'snowfall': 'Snowfall (cm)',
+                        'snow_depth': 'Snow Depth (meters)',
+                        'pressure_msl': 'Pressure MSL (hPa)',
+                        'surface_pressure': 'Surface Pressure (hPa)',
+                        'cloud_cover': 'Cloud Cover (%)',
+                        'wind_speed_10m': 'Wind Speed (km/h)',
+                        'wind_direction_10m': 'Wind Direction (degrees)',
+                        'wind_gusts_10m': 'Wind Gusts (km/h)',
+                        'soil_temperature_0cm': 'Soil Temperature (°C)',
+                        'soil_moisture_0_to_1cm': 'Soil Moisture (%)',
+                        'visibility': 'Visibility (m)',
+                        'uv_index': 'UV Index',
+                        'vapour_pressure_deficit': 'Vapour Pressure Deficit (kPa)'
+                    }
+                    
+                    # Check which parameters are actually available and have data
+                    for param, label in param_labels.items():
+                        if param in hourly_data and param != 'time':
+                            data_values = hourly_data[param]
+                            if isinstance(data_values, list) and data_values:
+                                # Check if parameter has any non-null values
+                                has_data = any(val is not None for val in data_values[:10])  # Check first 10 values
+                                if has_data:
+                                    available_params[param] = label
+                
+                return JSONResponse({
+                    "parameters": available_params,
+                    "total_available": len(available_params),
+                    "sample_location": sample_city,
+                    "timestamp": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                })
+                
+            except Exception as e:
+                logger.error(f"Error getting available parameters: {e}")
+                return JSONResponse({
+                    "error": "Internal server error",
+                    "message": str(e),
+                    "parameters": {},
+                    "timestamp": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                }, status_code=500)
+
         @self.app.get("/api/status")
         async def get_api_status():
             """Get API and self-hosted Open-Meteo status"""
